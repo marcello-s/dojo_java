@@ -9,6 +9,7 @@ https://docs.oracle.com/en/java/javase/25/index.html
 https://docs.oracle.com/en/java/javase/25/docs/api/index.html
 
 https://docs.gradle.org/current/userguide/userguide.html
+https://docs.gradle.org/current/userguide/getting_started_dev.html#dev_introduction
 
 create new project
 ```
