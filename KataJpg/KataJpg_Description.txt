@@ -1,0 +1,21 @@
+﻿/*
+ * The MIT License, Copyright (c) 2011-2025 Marcel Schneider
+ * for details see License.txt
+ */
+
+KataJpg: JPG file format reader
+=====================================================
+
+An example kata to learn file handling and stream 
+reading of bytes.
+https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
+https://en.wikipedia.org/wiki/JPEG#JPEG_files
+https://jpeg.org/jpeg/
+
+
+1) Given a file path as an argument open a the file and verify
+it is indeed a jpg file. Check the file exists. Read the jpg marker 
+of the file header.
+
+$ .\gradlew.bat run --args='C:\code\dojo\dojo_java\KataJpg\mona.jpg'
+
