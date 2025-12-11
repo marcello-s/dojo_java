@@ -1,0 +1,24 @@
+﻿/*
+ * The MIT License, Copyright (c) 2011-2025 Marcel Schneider
+ * for details see License.txt
+ */
+
+KataSpringBoot: First steps setting up Spring
+=====================================================
+
+Spring Quickstart tutorial has a configurator page for 
+gradle to set up a an app project using Spring Boot.
+
+dependencies: Spring Web
+https://start.spring.io/
+
+https://spring.io/guides
+
+1) Create a simple HelloWorld app using and setting 
+up the Spring framework.
+
+2) Register a hello service class.
+https://docs.spring.io/spring-framework/reference/core/beans.html
+https://docs.spring.io/spring-framework/reference/core/beans/java.html
+
+$ .\gradlew.bat bootRun

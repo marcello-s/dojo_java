@@ -18,4 +18,3 @@ it is indeed a jpg file. Check the file exists. Read the jpg marker
 of the file header.
 
 $ .\gradlew.bat run --args='C:\code\dojo\dojo_java\KataJpg\mona.jpg'
-
