@@ -14,6 +14,8 @@ public class App {
         demoBycycle();
         demoMountainBike();
         demoAcmeBycycle();
+
+        demoWildcard();
     }
 
     public static void demoBycycle() {
@@ -59,5 +61,12 @@ public class App {
         myBycycle.printStates();
         myBycycle.applyBrakes(5);
         myBycycle.printStates();
+    }
+
+    public static void demoWildcard() {
+        System.out.println("Wildcard Demo");
+
+        Wildcard wildcardDemo = new Wildcard();
+        wildcardDemo.demo();
     }
 }
