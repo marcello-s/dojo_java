@@ -1,5 +1,5 @@
 /*
- * The MIT License, Copyright (c) 2011-2025 Marcel Schneider
+ * The MIT License, Copyright (c) 2011-2026 Marcel Schneider
  * for details see License.txt
  */
 package org.example.KataSpringBoot;
