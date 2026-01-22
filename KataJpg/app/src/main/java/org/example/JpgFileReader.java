@@ -5,19 +5,24 @@
 
 package org.example;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class JpgFileReader {
 
-    public void read(String filePath) {       
+    public void read(String filePath) {
+        // convert input path
+        var path = Paths.get(filePath);
+        var absolutePath = path.toAbsolutePath();
+
         // check file exists
-        var file = new File(filePath);
-        if (!file.exists() || !file.isFile()) {
+        if (!Files.exists(absolutePath)) {
             System.out.println("File not found: " + filePath);
             return;
         }
 
         try {
-            var fis = new FileInputStream(file);
+            var fis = new FileInputStream(absolutePath.toString());
             var bis = new BufferedInputStream(fis);
             try (bis) {
 
