@@ -16,8 +16,8 @@ public class JpgFileReader {
         var absolutePath = path.toAbsolutePath();
 
         // check file exists
-        if (!Files.exists(absolutePath)) {
-            System.out.println("File not found: " + filePath);
+        if (!Files.exists(absolutePath) || !Files.isReadable(absolutePath)) {
+            System.out.println("File not found or not readable: " + filePath);
             return;
         }
 
