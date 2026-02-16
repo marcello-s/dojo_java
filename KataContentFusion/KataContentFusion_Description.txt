@@ -1,0 +1,12 @@
+/*
+ * The MIT License, Copyright (c) 2011-2026 Marcel Schneider
+ * for details see License.txt
+ */
+
+ dependencies: MySQL Driver
+https://start.spring.io/
+
+https://spring.io/guides
+
+
+$ .\gradlew.bat bootRun --args=""
