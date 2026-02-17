@@ -21,7 +21,7 @@ public class WorkflowDispatcher implements Dispatching {
 
         if (args.length == 0) {
             System.out.println("missing arguments: blah");
-            
+
             return;
         }
 
@@ -35,11 +35,8 @@ public class WorkflowDispatcher implements Dispatching {
             if (assets.toLowerCase().equals("movies"))
             {
                 var movies = movieScanner.Scan(path);
-
-                // test output
-                for(Movie m : movies) {
-                    System.out.format("%s %s%n", m.collection, m.scanName);
-                }
+                var store = new ScannedMoviesStore();
+                store.Serialize(new MovieVolume(volume, movies));
             }
         }
     }
