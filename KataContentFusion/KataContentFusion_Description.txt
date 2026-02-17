@@ -3,10 +3,38 @@
  * for details see License.txt
  */
 
- dependencies: MySQL Driver
+ContentFusion is a content creation tool based on media data.
+The tool analyses volumes of movie and tv-show content.
+It then creates new content based on data it found.
+
+dependencies: MySQL Driver
 https://start.spring.io/
 
 https://spring.io/guides
 
+gradle
+show all tasks
+$ .\gradlew.bat -q :tasks --all
 
-$ .\gradlew.bat bootRun --args=""
+build
+$ .\gradlew.bat build
+
+run
+$ .\gradlew.bat bootRun --args="scan movies volume-name C:\temp\Movies"
+
+
+movies archive
+--------------
+
+Volumes contain a folder /Movies:
+
+/[<Collection>]
+    /<title> (<year>) [<language>,<language>]
+        /media file
+        /media file
+/<title> (<year>) [<language>,<language>]
+    /media file
+    /media file
+
+Within the folder are either collections of movies, or just movies.
+The folder contains name key information, and the folder contains media files.
