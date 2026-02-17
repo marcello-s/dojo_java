@@ -3,8 +3,10 @@
  * for details see License.txt
  */
 
-package KataContentFusion;
+package KataContentFusion.Movies;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,8 @@ public class Movie {
 
     public String collection = "";
     
-    public Movie(Path path, String scanName) {
+    @JsonCreator
+    public Movie(@JsonProperty("path") Path path, @JsonProperty("scanName") String scanName) {
         this.path = path;
         this.scanName = scanName;
     }

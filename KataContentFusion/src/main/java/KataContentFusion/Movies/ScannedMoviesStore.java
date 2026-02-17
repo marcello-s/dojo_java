@@ -3,14 +3,16 @@
  * for details see License.txt
  */
 
-package KataContentFusion;
+package KataContentFusion.Movies;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -27,6 +29,7 @@ public class ScannedMoviesStore {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
         mapper.registerModule(module);
+
         try {
             var json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(movieVolumes);
 
@@ -39,5 +42,23 @@ public class ScannedMoviesStore {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Collection<MovieVolume> Deserialize() {
+        
+        var mapper = new ObjectMapper();
+        var module = new SimpleModule();
+        module.addSerializer(Path.class, new ToStringSerializer());
+        mapper.registerModule(module);
+
+        try {
+            var movieVolumes = mapper.readValue(new File(filePath), new TypeReference<ArrayList<MovieVolume>>() {});
+
+            return movieVolumes;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return new ArrayList<MovieVolume>();
+        }        
     }
 }

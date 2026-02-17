@@ -3,7 +3,7 @@
  * for details see License.txt
  */
 
-package KataContentFusion;
+package KataContentFusion.Movies;
 
 import java.util.Collection;
 

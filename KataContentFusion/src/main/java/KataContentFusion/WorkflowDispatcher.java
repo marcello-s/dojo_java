@@ -7,6 +7,10 @@ package KataContentFusion;
 
 import org.springframework.stereotype.Component;
 
+import KataContentFusion.Movies.MovieScanner;
+import KataContentFusion.Movies.MovieVolume;
+import KataContentFusion.Movies.ScannedMoviesStore;
+
 @Component
 public class WorkflowDispatcher implements Dispatching {
 
@@ -37,6 +41,14 @@ public class WorkflowDispatcher implements Dispatching {
                 var movies = movieScanner.Scan(path);
                 var store = new ScannedMoviesStore();
                 store.Serialize(new MovieVolume(volume, movies));
+            }
+        } else {
+            var store = new ScannedMoviesStore();
+            var movieVolumes = store.Deserialize();
+            for(var v : movieVolumes) {
+                for (var m : v.movies()) {
+                    System.out.println(m.scanName);
+                }
             }
         }
     }

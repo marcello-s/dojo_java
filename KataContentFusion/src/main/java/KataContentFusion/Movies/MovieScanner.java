@@ -3,7 +3,7 @@
  * for details see License.txt
  */
 
-package KataContentFusion;
+package KataContentFusion.Movies;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +13,9 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import org.springframework.stereotype.Component;
+
+import KataContentFusion.FileSytemVisitor;
+import KataContentFusion.FsEntry;
 
 @Component
 public class MovieScanner {
