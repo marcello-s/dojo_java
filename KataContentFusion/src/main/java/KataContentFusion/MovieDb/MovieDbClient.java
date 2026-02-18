@@ -18,4 +18,10 @@ public interface MovieDbClient {
 
     @GetExchange("/movie/{movieId}") 
     public MovieResponse getMovieDetail (@PathVariable("movieId") Integer movieId);
+
+    @GetExchange("/movie/{movieId}/credits")
+    public CreditResponse getMovieCredits (@PathVariable("movieId") Integer movieId);
+
+    @GetExchange("/person/{personId}")
+    public PersonResponse getPersonDetail (@PathVariable("personId") Integer personId);
 }

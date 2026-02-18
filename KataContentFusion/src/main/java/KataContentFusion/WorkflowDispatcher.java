@@ -56,8 +56,8 @@ public class WorkflowDispatcher implements Dispatching {
             }
             */
 
-            var movieResponse = movieDbClient.getMovieDetail(2163);
-            System.out.println(movieResponse);
+            var response = movieDbClient.searchMovies("Breakdown (1997)");
+            System.out.println(response);
         }
     }
 }
