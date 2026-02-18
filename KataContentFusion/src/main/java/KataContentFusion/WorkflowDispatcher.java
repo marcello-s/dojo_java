@@ -7,6 +7,7 @@ package KataContentFusion;
 
 import org.springframework.stereotype.Component;
 
+import KataContentFusion.MovieDb.MovieDbClient;
 import KataContentFusion.Movies.MovieScanner;
 import KataContentFusion.Movies.MovieVolume;
 import KataContentFusion.Movies.ScannedMoviesStore;
@@ -15,9 +16,11 @@ import KataContentFusion.Movies.ScannedMoviesStore;
 public class WorkflowDispatcher implements Dispatching {
 
     private MovieScanner movieScanner;
+    private MovieDbClient movieDbClient;
 
-    public WorkflowDispatcher(MovieScanner movieScanner) {
+    public WorkflowDispatcher(MovieScanner movieScanner, MovieDbClient movieDbClient) {
         this.movieScanner = movieScanner;
+        this.movieDbClient = movieDbClient;
     }
 
     public void Dispatch(String[] args) {
@@ -43,6 +46,7 @@ public class WorkflowDispatcher implements Dispatching {
                 store.Serialize(new MovieVolume(volume, movies));
             }
         } else {
+            /*
             var store = new ScannedMoviesStore();
             var movieVolumes = store.Deserialize();
             for(var v : movieVolumes) {
@@ -50,6 +54,10 @@ public class WorkflowDispatcher implements Dispatching {
                     System.out.println(m.scanName);
                 }
             }
+            */
+
+            var movieResponse = movieDbClient.getMovieDetail(2163);
+            System.out.println(movieResponse);
         }
     }
 }

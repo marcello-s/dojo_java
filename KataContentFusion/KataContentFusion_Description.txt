@@ -21,6 +21,7 @@ $ .\gradlew.bat build
 
 run
 $ .\gradlew.bat bootRun --args="scan movies volume-name C:\temp\Movies"
+$ .\gradlew.bat bootRun --args="blah blah blah blah"
 
 
 movies archive
@@ -38,3 +39,16 @@ Volumes contain a folder /Movies:
 
 Within the folder are either collections of movies, or just movies.
 The folder contains name key information, and the folder contains media files.
+
+
+www.themovie.org API
+--------------------
+
+help for consuming a REST API
+https://spring.io/guides/gs/consuming-rest
+
+Enrich movie information by consuming an online service. 
+Search for the movie by title and year. Load movie details and credits.
+
+The RestClient needs a Bearer token.
+Set env variable: THEMOVIEDB_API_BEARER_TOKEN

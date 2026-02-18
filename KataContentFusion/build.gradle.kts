@@ -20,9 +20,11 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.boot:spring-boot-starter-restclient")
 	implementation("com.fasterxml.jackson.core:jackson-databind")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
