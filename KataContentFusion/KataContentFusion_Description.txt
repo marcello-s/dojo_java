@@ -52,3 +52,24 @@ Search for the movie by title and year. Load movie details and credits.
 
 The RestClient needs a Bearer token.
 Set env variable: THEMOVIEDB_API_BEARER_TOKEN
+
+local database
+--------------
+
+For a local integration of all extracted data ContentFusion can use an in-memory database.
+SQLite contains a few tables to import scanning results and information from themoviedb.org.
+download sqlite tools
+https://sqlite.org/download.html
+(add to path, and test> sqlite3 -version)
+
+DB Browser for SQLite, UI tool
+https://sqlitebrowser.org/
+
+command line parameter
+--enable-native-access=ALL-UNNAMED
+set 'hibernate.transaction.jta.platform=enable'
+
+db scripts in: /src/main/resources (schema.sql, data.sql)
+application.properties: needs lots of entries
+# this will nor enforce ugly snake_case for tables/columns
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl

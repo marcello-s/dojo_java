@@ -5,8 +5,14 @@
 
 package KataContentFusion;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import KataContentFusion.LocalDb.Repository;
+import KataContentFusion.LocalDb.ScriptTracking;
 import KataContentFusion.MovieDb.MovieDbClient;
 import KataContentFusion.Movies.MovieScanner;
 import KataContentFusion.Movies.MovieVolume;
@@ -15,12 +21,17 @@ import KataContentFusion.Movies.ScannedMoviesStore;
 @Component
 public class WorkflowDispatcher implements Dispatching {
 
-    private MovieScanner movieScanner;
-    private MovieDbClient movieDbClient;
+    private final MovieScanner movieScanner;
+    private final MovieDbClient movieDbClient;
+    private final Repository repository;
 
-    public WorkflowDispatcher(MovieScanner movieScanner, MovieDbClient movieDbClient) {
+    public WorkflowDispatcher(
+        MovieScanner movieScanner, 
+        MovieDbClient movieDbClient,
+        Repository repository) {
         this.movieScanner = movieScanner;
         this.movieDbClient = movieDbClient;
+        this.repository = repository;
     }
 
     public void Dispatch(String[] args) {
@@ -56,8 +67,29 @@ public class WorkflowDispatcher implements Dispatching {
             }
             */
 
+            /*
             var response = movieDbClient.searchMovies("Breakdown (1997)");
             System.out.println(response);
+            */
+
+            List<ScriptTracking> allScriptTrackings = repository.findAll();
+            System.out.println("size: " + allScriptTrackings.size());
+            for(ScriptTracking s : allScriptTrackings) {
+                System.out.println(s.scriptName);
+                System.out.println(s.createdAt);
+            }
+
+            /*
+            var st1 = new ScriptTracking();
+            st1.scriptName = "test1";
+            st1.createdAt = LocalDateTime.now();
+
+            var st2 = new ScriptTracking();
+            st2.scriptName = "test2";
+            st2.createdAt = LocalDateTime.now();
+
+            repository.saveAll(Arrays.asList(st1, st2));
+            */
         }
     }
 }

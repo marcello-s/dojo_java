@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# KataContentFusion db
+contentfusion.sqlt
