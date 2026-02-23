@@ -8,6 +8,6 @@ package KataContentFusion.LocalDb;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface Repository extends JpaRepository<ScriptTracking, Integer>{
-    List<ScriptTracking> findByScriptName(String scriptName);
+public interface AssetRepository extends JpaRepository<Asset, Integer> {
+    List<Asset> findByMediaPath(String mediaPath);
 }

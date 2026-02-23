@@ -44,7 +44,7 @@ public class ScannedMoviesStore {
         }
     }
 
-    public Collection<MovieVolume> Deserialize() {
+    public Collection<MovieVolume> Deserialize(String path) {
         
         var mapper = new ObjectMapper();
         var module = new SimpleModule();
@@ -52,7 +52,7 @@ public class ScannedMoviesStore {
         mapper.registerModule(module);
 
         try {
-            var movieVolumes = mapper.readValue(new File(filePath), new TypeReference<ArrayList<MovieVolume>>() {});
+            var movieVolumes = mapper.readValue(new File(path), new TypeReference<ArrayList<MovieVolume>>() {});
 
             return movieVolumes;
         } catch (Exception e) {

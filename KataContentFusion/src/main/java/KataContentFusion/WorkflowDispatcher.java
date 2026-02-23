@@ -5,15 +5,10 @@
 
 package KataContentFusion;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
-import KataContentFusion.LocalDb.Repository;
-import KataContentFusion.LocalDb.ScriptTracking;
-import KataContentFusion.MovieDb.MovieDbClient;
+import KataContentFusion.LocalDb.ScriptTrackingRepository;
+import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
 import KataContentFusion.Movies.MovieVolume;
 import KataContentFusion.Movies.ScannedMoviesStore;
@@ -22,16 +17,14 @@ import KataContentFusion.Movies.ScannedMoviesStore;
 public class WorkflowDispatcher implements Dispatching {
 
     private final MovieScanner movieScanner;
-    private final MovieDbClient movieDbClient;
-    private final Repository repository;
+    private final MovieImporter movieImporter;
 
     public WorkflowDispatcher(
-        MovieScanner movieScanner, 
-        MovieDbClient movieDbClient,
-        Repository repository) {
+        MovieScanner movieScanner,
+        ScriptTrackingRepository repository,
+        MovieImporter movieImporter) {
         this.movieScanner = movieScanner;
-        this.movieDbClient = movieDbClient;
-        this.repository = repository;
+        this.movieImporter = movieImporter;
     }
 
     public void Dispatch(String[] args) {
@@ -44,52 +37,28 @@ public class WorkflowDispatcher implements Dispatching {
         }
 
         var command = args[0];
-        var assets = args[1];
-        var volume = args[2];
-        var path = args[3];
-        System.out.printf("%s - %s - %s - %s%n", command, assets, volume, path);
-
         if (command.toLowerCase().equals("scan")) {
+
+            var assets = args[1];
             if (assets.toLowerCase().equals("movies"))
             {
+                var volume = args[2];
+                var path = args[3];
                 var movies = movieScanner.Scan(path);
                 var store = new ScannedMoviesStore();
                 store.Serialize(new MovieVolume(volume, movies));
             }
+        } else if(command.toLowerCase().equals("import")) {
+            
+            var assets = args[1];
+            if (assets.toLowerCase().equals("movies")) {
+                var path = args[2];
+                var store = new ScannedMoviesStore();
+                var moviesVolumes = store.Deserialize(path);
+                movieImporter.Import(moviesVolumes);
+            }
         } else {
-            /*
-            var store = new ScannedMoviesStore();
-            var movieVolumes = store.Deserialize();
-            for(var v : movieVolumes) {
-                for (var m : v.movies()) {
-                    System.out.println(m.scanName);
-                }
-            }
-            */
 
-            /*
-            var response = movieDbClient.searchMovies("Breakdown (1997)");
-            System.out.println(response);
-            */
-
-            List<ScriptTracking> allScriptTrackings = repository.findAll();
-            System.out.println("size: " + allScriptTrackings.size());
-            for(ScriptTracking s : allScriptTrackings) {
-                System.out.println(s.scriptName);
-                System.out.println(s.createdAt);
-            }
-
-            /*
-            var st1 = new ScriptTracking();
-            st1.scriptName = "test1";
-            st1.createdAt = LocalDateTime.now();
-
-            var st2 = new ScriptTracking();
-            st2.scriptName = "test2";
-            st2.createdAt = LocalDateTime.now();
-
-            repository.saveAll(Arrays.asList(st1, st2));
-            */
         }
     }
 }
