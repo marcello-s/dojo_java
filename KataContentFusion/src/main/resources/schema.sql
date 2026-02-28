@@ -92,3 +92,152 @@ BEGIN TRANSACTION;
     INSERT OR REPLACE INTO 'ScriptTracking' (Id, ScriptName, CreatedAt) 
     VALUES (2,'01_ASSET_STORE.sql', CURRENT_TIMESTAMP);
 COMMIT TRANSACTION;
+
+-- THEMOVIEDATABASE.ORG
+-- Movie
+CREATE TABLE IF NOT EXISTS 'Movie'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'ExternalId' INTEGER,
+    'Title' TEXT(50),
+    'Collecion' INTEGER NULL,
+    'Adult' BOOLEAN,
+    'Budget' INTEGER,
+    'ImdbId' TEXT(25),
+    'OriginalLanguage' TEXT(10),
+    'OriginalTitle' TEXT(50),
+    'Overview' TEXT(1000),
+    'Popularity' NUMERIC,
+    'ReleaseDate' NUMERIC,
+    'Revenue' INTEGER,
+    'Runtime' INTEGER,
+    'Status' TEXT(15),
+    'Tagline' TEXT(100),
+    'VoteAverage' NUMERIC,
+    'VoteCount' INTEGER
+);
+
+-- Genre
+CREATE TABLE IF NOT EXISTS 'Gender'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'Name' TEXT(50)
+);
+
+-- ProductionCompany
+CREATE TABLE IF NOT EXISTS 'ProductionCompany'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'Name' TEXT(50),
+    'LogoPath' TEXT(50),
+    'OriginCountry' TEXT(50)
+);
+
+-- ProductionCountry
+CREATE TABLE IF NOT EXISTS 'ProductionCountry'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'Name' TEXT(50),
+    'Iso3166_1' TEXT(50)
+);
+
+-- Role
+CREATE TABLE IF NOT EXISTS 'Role'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'Name' TEXT(50)
+);
+
+-- Cast
+CREATE TABLE IF NOT EXISTS 'Cast'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'ExternalId' INTEGER,
+    'Name' TEXT(50),
+    'OriginalName' TEXT(50),
+    'Adult' BOOLEAN,
+    'Gender' INTEGER,
+    'RoleId' INTEGER,
+    'Popularity' NUMERIC,
+    'ProfilePath' TEXT(50),
+    'CastId' INTEGER,
+    'Character' TEXT(20),
+    'CreditId' TEXT(10),
+    'Order' INTEGER,
+    FOREIGN KEY(RoleId) REFERENCES Role(Id)
+);
+
+-- Person
+CREATE TABLE IF NOT EXISTS 'Person'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'ExternalId' INTEGER,
+    'Name' TEXT(50),
+    'Adult' BOOLEAN,
+    'Biography' TEXT(500),
+    'Birthday' NUMERIC,
+    'Deathday' NUMERIC NULL,
+    'Gender' INTEGER,
+    'Homepage' TEXT(100),
+    'ImdbId' TEXT(25),
+    'RoleId' INTEGER,
+    'PlaceOfBirth' TEXT(100),
+    'Popularity' NUMERIC,
+    'ProfilePath' TEXT(100),
+    FOREIGN KEY(RoleId) REFERENCES Role(Id)
+);
+
+-- MovieGenre relation
+CREATE TABLE IF NOT EXISTS 'MovieGenre'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'MovieId' INTEGER,
+    'GenreId' INTEGER,
+    FOREIGN KEY(MovieId) REFERENCES Movie(Id),
+    FOREIGN KEY(GenreId) REFERENCES Genre(Id)
+);
+
+-- MovieProductionCompany relation
+CREATE TABLE IF NOT EXISTS 'MovieProductionCompany'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'MovieId' INTEGER,
+    'ProductionCompanyId' INTEGER,
+    FOREIGN KEY(MovieId) REFERENCES Movie(Id),
+    FOREIGN KEY(ProductionCompanyId) REFERENCES ProductionCompany(Id)
+);
+
+-- MovieProductionCountry relation
+CREATE TABLE IF NOT EXISTS 'MovieProductionCompany'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'MovieId' INTEGER,
+    'ProductionCountryId' INTEGER,
+    FOREIGN KEY(MovieId) REFERENCES Movie(Id),
+    FOREIGN KEY(ProductionCountryId) REFERENCES ProductionCountry(Id)
+);
+
+-- MovieCast relation
+CREATE TABLE IF NOT EXISTS 'MovieCast'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'MovieId' INTEGER,
+    'CastId' INTEGER,
+    FOREIGN KEY(MovieId) REFERENCES Movie(Id),
+    FOREIGN KEY(CastId) REFERENCES Cast(Id)
+);
+
+-- ScanNameMovie relation
+CREATE TABLE IF NOT EXISTS 'ScanNameMovie'
+(
+    'Id' INTEGER PRIMARY KEY ASC,
+    'ScanNameId' INTEGER,
+    'MovieId' INTEGER,
+    FOREIGN KEY(ScanNameId) REFERENCES ScanName(Id),
+    FOREIGN KEY(MovieId) REFERENCES Movie(Id)
+);
+
+BEGIN TRANSACTION;
+    INSERT OR REPLACE INTO 'ScriptTracking' (Id, ScriptName, CreatedAt) 
+    VALUES (3,'02_MOVIE_STORE.sql', CURRENT_TIMESTAMP);
+COMMIT TRANSACTION;
