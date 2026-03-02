@@ -26,7 +26,7 @@ public class Cast {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleId")
-    public Role roleId;
+    public Role role;
 
     public Double popularity;
     public String profilePath;

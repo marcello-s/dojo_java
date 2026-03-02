@@ -7,7 +7,7 @@ package KataContentFusion;
 
 import org.springframework.stereotype.Component;
 
-import KataContentFusion.LocalDb.ScriptTrackingRepository;
+import KataContentFusion.LocalDb.Repos.ScriptTrackingRepository;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;

@@ -33,7 +33,7 @@ public class Person {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleId")
-    public Role roleId;
+    public Role role;
 
     public String placeOfBirth;
     public Double popularity;

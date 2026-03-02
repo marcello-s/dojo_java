@@ -21,9 +21,9 @@ public class MovieProductionCountry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movieId")
-    public Movie movieId;
+    public Movie movie;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productionCountryId")
-    public ProductionCountry productionCountryId;    
+    public ProductionCountry productionCountry;    
 }

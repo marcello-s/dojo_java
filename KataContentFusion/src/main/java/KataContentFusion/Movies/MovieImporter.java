@@ -16,6 +16,7 @@ import KataContentFusion.LocalDb.Repos.AssetTypeRepository;
 import KataContentFusion.LocalDb.Repos.AssetVolumeRepository;
 import KataContentFusion.LocalDb.Repos.ScanNameRepository;
 import KataContentFusion.LocalDb.Repos.ScanTypeRepository;
+import KataContentFusion.LocalDb.Repos.VolumeRepository;
 
 @Component
 public class MovieImporter {
