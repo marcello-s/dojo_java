@@ -21,9 +21,9 @@ public class AssetVolume {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assetId")
-    public Asset assetId;
+    public Asset asset;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "volumeId")
-    public Volume volumeId;
+    public Volume volume;
 }

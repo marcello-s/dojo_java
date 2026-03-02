@@ -5,12 +5,14 @@
 
 package KataContentFusion.LocalDb;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class ScanName {
@@ -27,4 +29,7 @@ public class ScanName {
     public void setCollection(String collection) {
         this.collection = collection;
     }
+
+    @OneToMany(mappedBy = "id")
+    public List<ScanNameMovie> scanNameMovies;
 }

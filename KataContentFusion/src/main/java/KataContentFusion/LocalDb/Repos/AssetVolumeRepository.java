@@ -3,10 +3,12 @@
  * for details see License.txt
  */
 
-package KataContentFusion.LocalDb;
+package KataContentFusion.LocalDb.Repos;
 
 // import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import KataContentFusion.LocalDb.AssetVolume;
 
 public interface AssetVolumeRepository extends JpaRepository<AssetVolume, Integer> {
     

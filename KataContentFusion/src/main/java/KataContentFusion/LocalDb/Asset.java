@@ -21,15 +21,15 @@ public class Asset {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scanTypeId")
-    public ScanType scanTypeId;
+    public ScanType scanType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scanNameId")
-    public ScanName scanNameId;
+    public ScanName scanName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assetTypeId")
-    public AssetType assetTypeId;
+    public AssetType assetType;
 
     public String mediaPath;
     public Integer resolutionX;

@@ -21,7 +21,7 @@ public class SubtitleEntry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assetId")
-    public Asset assetId;
+    public Asset asset;
 
     public Integer sequenceNumber;
     public Integer timeFrom;

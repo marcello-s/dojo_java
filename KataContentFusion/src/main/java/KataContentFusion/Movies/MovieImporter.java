@@ -11,6 +11,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import KataContentFusion.LocalDb.*;
+import KataContentFusion.LocalDb.Repos.AssetRepository;
+import KataContentFusion.LocalDb.Repos.AssetTypeRepository;
+import KataContentFusion.LocalDb.Repos.AssetVolumeRepository;
+import KataContentFusion.LocalDb.Repos.ScanNameRepository;
+import KataContentFusion.LocalDb.Repos.ScanTypeRepository;
 
 @Component
 public class MovieImporter {
@@ -65,15 +70,15 @@ public class MovieImporter {
                     : assetTypes.get(0);
 
                     var asset = new Asset();
-                    asset.scanTypeId = movieScanType;
-                    asset.assetTypeId = assetType;
-                    asset.scanNameId = scanName;
+                    asset.scanType = movieScanType;
+                    asset.assetType = assetType;
+                    asset.scanName = scanName;
                     asset.mediaPath = mediaPath;
                     assetRepo.save(asset);
 
                     var assetVolume = new AssetVolume();
-                    assetVolume.volumeId = volume;
-                    assetVolume.assetId = asset;
+                    assetVolume.volume = volume;
+                    assetVolume.asset = asset;
                     assetVolumeRepo.save(assetVolume);
                 }
             }

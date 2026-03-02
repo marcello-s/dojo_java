@@ -22,6 +22,7 @@ $ .\gradlew.bat build
 run
 $ .\gradlew.bat bootRun --args="scan movies volume-name C:\temp\Movies"
 $ .\gradlew.bat bootRun --args="import movies C:\temp\scannedMovies.json"
+$ .\gradlew.bat bootRun --args="enrich movies 3"
 $ .\gradlew.bat bootRun --args="blah blah blah blah"
 
 

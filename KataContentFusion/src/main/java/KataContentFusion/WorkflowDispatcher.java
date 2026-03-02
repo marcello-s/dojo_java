@@ -8,6 +8,7 @@ package KataContentFusion;
 import org.springframework.stereotype.Component;
 
 import KataContentFusion.LocalDb.ScriptTrackingRepository;
+import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
 import KataContentFusion.Movies.MovieVolume;
@@ -18,13 +19,16 @@ public class WorkflowDispatcher implements Dispatching {
 
     private final MovieScanner movieScanner;
     private final MovieImporter movieImporter;
+    private final MovieEnricher movieEnricher;
 
     public WorkflowDispatcher(
         MovieScanner movieScanner,
         ScriptTrackingRepository repository,
-        MovieImporter movieImporter) {
+        MovieImporter movieImporter,
+        MovieEnricher movieEnricher) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
+        this.movieEnricher = movieEnricher;
     }
 
     public void Dispatch(String[] args) {
@@ -57,8 +61,15 @@ public class WorkflowDispatcher implements Dispatching {
                 var moviesVolumes = store.Deserialize(path);
                 movieImporter.Import(moviesVolumes);
             }
-        } else {
+        } else if(command.toLowerCase().equals("enrich")) {
 
+            var assets = args[1];
+            if (assets.toLowerCase().equals("movies")) {
+                var maxCount = args[2];
+                movieEnricher.Enrich(Integer.parseInt(maxCount));
+            }
+        } else {
+            System.out.println("command not found");
         }
     }
 }

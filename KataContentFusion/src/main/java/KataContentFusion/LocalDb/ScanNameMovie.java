@@ -21,9 +21,9 @@ public class ScanNameMovie {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scanNameId")
-    public ScanName scanNameId;
+    public ScanName scanName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movieId")
-    public Movie movieId;
+    public Movie movie;
 }
