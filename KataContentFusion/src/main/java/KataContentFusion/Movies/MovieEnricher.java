@@ -122,10 +122,38 @@ public class MovieEnricher {
 
     private List<SearchResult> filterSearchResults(SearchResponse searchResponse, String title, String year) {
         
-        return Arrays.stream(searchResponse.results())
+        // exact matches for title and year
+        var exactMatches = Arrays.stream(searchResponse.results())
             .filter(r -> r.title().equalsIgnoreCase(title))
             .filter(r -> r.release_date() != null && r.release_date().startsWith(year.substring(1, 5)))
             .toList();
+
+        if (exactMatches.size() > 0) {
+            return exactMatches;
+        }
+
+        // exact matches for original title and year
+        var exactOriginalTitleMatches = Arrays.stream(searchResponse.results())
+            .filter(r -> r.original_title().equalsIgnoreCase(title))
+            .filter(r -> r.release_date() != null && r.release_date().startsWith(year.substring(1, 5)))
+            .toList();
+
+        if (exactOriginalTitleMatches.size() > 0) {
+            return exactOriginalTitleMatches;
+        }
+
+       // remove punctuation and compare titles
+        var normalizedTitle = title.replaceAll("\\p{Punct}", "").toLowerCase();
+        var normalizedMatches = Arrays.stream(searchResponse.results())
+            .filter(r -> r.title().replaceAll("\\p{Punct}", "").equalsIgnoreCase(normalizedTitle))
+            .filter(r -> r.release_date() != null && r.release_date().startsWith(year.substring(1, 5)))
+            .toList();
+
+        if (normalizedMatches.size() > 0) {
+            return normalizedMatches;
+        } else {
+            return Arrays.asList(searchResponse.results());
+        }         
     }
 
     private MovieResponse getMovieDetail(Integer movieId) {
