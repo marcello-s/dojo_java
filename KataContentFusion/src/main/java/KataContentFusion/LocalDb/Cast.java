@@ -33,5 +33,5 @@ public class Cast {
     public Integer castId;
     public String character;
     public String creditId;
-    public Integer order;
+    public Integer orderNo;
 }

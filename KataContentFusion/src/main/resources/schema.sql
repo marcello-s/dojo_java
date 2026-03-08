@@ -100,7 +100,6 @@ CREATE TABLE IF NOT EXISTS 'Movie'
     'Id' INTEGER PRIMARY KEY ASC,
     'ExternalId' INTEGER,
     'Title' TEXT(50),
-    'Collecion' INTEGER NULL,
     'Adult' BOOLEAN,
     'Budget' INTEGER,
     'ImdbId' TEXT(25),
@@ -118,9 +117,10 @@ CREATE TABLE IF NOT EXISTS 'Movie'
 );
 
 -- Genre
-CREATE TABLE IF NOT EXISTS 'Gender'
+CREATE TABLE IF NOT EXISTS 'Genre'
 (
     'Id' INTEGER PRIMARY KEY ASC,
+    'ExternalId' INTEGER,
     'Name' TEXT(50)
 );
 
@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS 'Gender'
 CREATE TABLE IF NOT EXISTS 'ProductionCompany'
 (
     'Id' INTEGER PRIMARY KEY ASC,
+    'ExternalId' INTEGER,
     'Name' TEXT(50),
     'LogoPath' TEXT(50),
     'OriginCountry' TEXT(50)
@@ -163,7 +164,7 @@ CREATE TABLE IF NOT EXISTS 'Cast'
     'CastId' INTEGER,
     'Character' TEXT(20),
     'CreditId' TEXT(10),
-    'Order' INTEGER,
+    'OrderNo' INTEGER,
     FOREIGN KEY(RoleId) REFERENCES Role(Id)
 );
 
@@ -174,8 +175,8 @@ CREATE TABLE IF NOT EXISTS 'Person'
     'ExternalId' INTEGER,
     'Name' TEXT(50),
     'Adult' BOOLEAN,
-    'Biography' TEXT(500),
-    'Birthday' NUMERIC,
+    'Biography' TEXT(5000),
+    'Birthday' NUMERIC NULL,
     'Deathday' NUMERIC NULL,
     'Gender' INTEGER,
     'Homepage' TEXT(100),
@@ -208,7 +209,7 @@ CREATE TABLE IF NOT EXISTS 'MovieProductionCompany'
 );
 
 -- MovieProductionCountry relation
-CREATE TABLE IF NOT EXISTS 'MovieProductionCompany'
+CREATE TABLE IF NOT EXISTS 'MovieProductionCountry'
 (
     'Id' INTEGER PRIMARY KEY ASC,
     'MovieId' INTEGER,

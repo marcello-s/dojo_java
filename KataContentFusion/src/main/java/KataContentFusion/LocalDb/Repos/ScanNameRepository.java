@@ -24,7 +24,7 @@ public interface ScanNameRepository extends JpaRepository<ScanName, Integer> {
     */
 
     // refer to @entity attribute names, not the table definitions!
-    // with this data model the relation is by entity. Remove 'Id' from the field name
+    // with this data model the relation is by entity.
     @Query("SELECT sn FROM ScanName sn LEFT JOIN ScanNameMovie snm ON sn.id = snm.scanName.id WHERE snm.scanName.id IS NULL")
-    List<ScanName> getScanNamesWithoutMoviesAgain(Pageable peagable);    
+    List<ScanName> getScanNamesWithoutMovies(Pageable peagable);    
 }

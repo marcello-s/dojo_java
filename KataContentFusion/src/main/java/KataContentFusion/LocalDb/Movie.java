@@ -6,7 +6,6 @@
 package KataContentFusion.LocalDb;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +19,6 @@ public class Movie {
     public Integer id;
     public Integer externalId;
     public String title;
-    public String collection;
     public Boolean adult;
     public Integer budget;
     public String imdbId;
@@ -35,12 +33,4 @@ public class Movie {
     public String tagline;
     public Double voteAverage;
     public Integer voteCount;
-
-    public Optional<String> getCollection() {
-        return Optional.ofNullable(collection);
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }    
 }

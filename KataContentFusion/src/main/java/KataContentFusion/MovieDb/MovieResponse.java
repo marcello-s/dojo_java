@@ -5,19 +5,17 @@
 
 package KataContentFusion.MovieDb;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record MovieResponse (
     Boolean adult,
     String backdrop_path,
-    Optional<Integer> belongs_to_collection,
+    MovieCollection belongs_to_collection,
     Integer budget,    
     Genre[] genres,
     String homepage,
-    Integer Id,
+    Integer id,
     String imdb_id,
     String[] origin_country,
     String original_language,

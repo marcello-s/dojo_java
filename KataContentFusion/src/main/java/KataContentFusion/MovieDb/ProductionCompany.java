@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ProductionCompany(
-    String id,
+    Integer id,
     String logo_path,
     String name,
     String origin_country

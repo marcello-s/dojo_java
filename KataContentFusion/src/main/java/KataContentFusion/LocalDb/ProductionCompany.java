@@ -15,6 +15,7 @@ public class ProductionCompany {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
+    public Integer externalId;
     public String name;
     public String logoPath;
     public String originCountry;

@@ -8,8 +8,9 @@ package KataContentFusion.MovieDb;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record CreditResponse(
-    Integer id, // refers to the movie
-    Cast[] cast,
-    Cast[] crew
+public record MovieCollection (
+    Integer id,
+    String name,
+    String poster_path,
+    String backdrop_path
 ) {};
