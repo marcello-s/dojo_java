@@ -11,6 +11,7 @@ import KataContentFusion.LocalDb.Repos.ScriptTrackingRepository;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
+import KataContentFusion.Movies.MovieSubtitleImporter;
 import KataContentFusion.Movies.MovieVolume;
 import KataContentFusion.Movies.ScannedMoviesStore;
 
@@ -19,15 +20,18 @@ public class WorkflowDispatcher implements Dispatching {
 
     private final MovieScanner movieScanner;
     private final MovieImporter movieImporter;
+    private final MovieSubtitleImporter movieSubtitleImporter;
     private final MovieEnricher movieEnricher;
 
     public WorkflowDispatcher(
         MovieScanner movieScanner,
         ScriptTrackingRepository repository,
         MovieImporter movieImporter,
+        MovieSubtitleImporter movieSubtitleImporter,
         MovieEnricher movieEnricher) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
+        this.movieSubtitleImporter = movieSubtitleImporter;
         this.movieEnricher = movieEnricher;
     }
 
@@ -60,6 +64,10 @@ public class WorkflowDispatcher implements Dispatching {
                 var store = new ScannedMoviesStore();
                 var moviesVolumes = store.Deserialize(path);
                 movieImporter.Import(moviesVolumes);
+            } else if (assets.toLowerCase().equals("subtitles")) {
+                var volume = args[2];
+                var maxCount = args[3];
+                movieSubtitleImporter.Import(volume, Integer.parseInt(maxCount));
             }
         } else if(command.toLowerCase().equals("enrich")) {
 

@@ -24,7 +24,7 @@ public class SubtitleEntry {
     public Asset asset;
 
     public Integer sequenceNumber;
-    public Integer timeFrom;
-    public Integer timeTo;
+    public Long timeFrom;
+    public Long timeTo;
     public String text;
 }
