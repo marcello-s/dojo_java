@@ -15,7 +15,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileSytemVisitor extends SimpleFileVisitor<Path> {
+import org.springframework.stereotype.Component;
+
+@Component
+public class FileSystemVisitor extends SimpleFileVisitor<Path> {
 
     public List<FsEntry> entries = new ArrayList<FsEntry>();
     

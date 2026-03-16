@@ -27,6 +27,10 @@ $ .\gradlew.bat bootRun --args="import resolutions volume-name 3"
 $ .\gradlew.bat bootRun --args="enrich movies 3"
 $ .\gradlew.bat bootRun --args="blah blah blah blah"
 
+run tests
+$ .\gradlew.bat test -i
+$ .\gradlew.bat test --tests MovieScannerTest -i
+
 
 movies archive
 --------------
