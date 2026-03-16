@@ -23,6 +23,7 @@ run
 $ .\gradlew.bat bootRun --args="scan movies volume-name C:\temp\_cf\Movies"
 $ .\gradlew.bat bootRun --args="import movies C:\temp\_cf\scannedMovies.json"
 $ .\gradlew.bat bootRun --args="import subtitles volume-name 3"
+$ .\gradlew.bat bootRun --args="import resolutions volume-name 3"
 $ .\gradlew.bat bootRun --args="enrich movies 3"
 $ .\gradlew.bat bootRun --args="blah blah blah blah"
 

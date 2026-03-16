@@ -8,6 +8,7 @@ package KataContentFusion;
 import org.springframework.stereotype.Component;
 
 import KataContentFusion.LocalDb.Repos.ScriptTrackingRepository;
+import KataContentFusion.Movies.AssetResolutionImporter;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
@@ -22,17 +23,20 @@ public class WorkflowDispatcher implements Dispatching {
     private final MovieImporter movieImporter;
     private final MovieSubtitleImporter movieSubtitleImporter;
     private final MovieEnricher movieEnricher;
+    private final AssetResolutionImporter assetResolutionImporter;
 
     public WorkflowDispatcher(
         MovieScanner movieScanner,
         ScriptTrackingRepository repository,
         MovieImporter movieImporter,
         MovieSubtitleImporter movieSubtitleImporter,
-        MovieEnricher movieEnricher) {
+        MovieEnricher movieEnricher,
+        AssetResolutionImporter assetResolutionImporter) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
         this.movieSubtitleImporter = movieSubtitleImporter;
         this.movieEnricher = movieEnricher;
+        this.assetResolutionImporter = assetResolutionImporter;
     }
 
     public void Dispatch(String[] args) {
@@ -68,6 +72,10 @@ public class WorkflowDispatcher implements Dispatching {
                 var volume = args[2];
                 var maxCount = args[3];
                 movieSubtitleImporter.Import(volume, Integer.parseInt(maxCount));
+            } else if (assets.toLowerCase().equals("resolutions")) {
+                var volume = args[2];
+                var maxCount = args[3];
+                assetResolutionImporter.Import(volume, Integer.parseInt(maxCount));
             }
         } else if(command.toLowerCase().equals("enrich")) {
 

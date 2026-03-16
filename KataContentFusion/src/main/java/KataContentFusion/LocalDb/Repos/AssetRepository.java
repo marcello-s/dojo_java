@@ -17,4 +17,7 @@ public interface AssetRepository extends JpaRepository<Asset, Integer> {
 
     @Query("SELECT a FROM Asset a INNER JOIN AssetVolume av ON av.asset.id = a.id LEFT JOIN SubtitleEntry se ON se.asset.id = a.id WHERE av.volume.id = :volumeId AND se.asset.id IS NULL")
     List<Asset> getAssetsWithoutSubtitles(@Param("volumeId") Integer volumeId);
+
+    @Query("SELECT a FROM Asset a INNER JOIN AssetVolume av ON av.asset.id = a.id  WHERE av.volume.id = :volumeId AND a.resolutionX IS NULL AND a.resolutionY IS NULL")
+    List<Asset> getAssetsWithoutResolutionInfo(@Param("volumeId") Integer volumeId);
 }
