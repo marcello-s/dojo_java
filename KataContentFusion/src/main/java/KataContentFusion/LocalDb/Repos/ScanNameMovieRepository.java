@@ -12,4 +12,6 @@ import KataContentFusion.LocalDb.ScanNameMovie;
 
 public interface ScanNameMovieRepository extends JpaRepository<ScanNameMovie, Integer> {
     List<ScanNameMovie> findByScanNameIdAndMovieId(Integer scanNameId, Integer movieId);    
+
+    List<ScanNameMovie> findScanNameMovieByMovieId(Integer movieId);
 }

@@ -7,11 +7,13 @@ package KataContentFusion;
 
 import org.springframework.stereotype.Component;
 
+import KataContentFusion.LocalDb.Movie;
 import KataContentFusion.LocalDb.Repos.ScriptTrackingRepository;
 import KataContentFusion.Movies.AssetResolutionImporter;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
+import KataContentFusion.Movies.MovieSegmenter;
 import KataContentFusion.Movies.MovieSubtitleImporter;
 import KataContentFusion.Movies.MovieVolume;
 import KataContentFusion.Movies.ScannedMoviesStore;
@@ -23,6 +25,7 @@ public class WorkflowDispatcher implements Dispatching {
     private final MovieImporter movieImporter;
     private final MovieSubtitleImporter movieSubtitleImporter;
     private final MovieEnricher movieEnricher;
+    private final MovieSegmenter movieSegmenter;
     private final AssetResolutionImporter assetResolutionImporter;
 
     public WorkflowDispatcher(
@@ -31,11 +34,13 @@ public class WorkflowDispatcher implements Dispatching {
         MovieImporter movieImporter,
         MovieSubtitleImporter movieSubtitleImporter,
         MovieEnricher movieEnricher,
+        MovieSegmenter movieSegmenter,
         AssetResolutionImporter assetResolutionImporter) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
         this.movieSubtitleImporter = movieSubtitleImporter;
         this.movieEnricher = movieEnricher;
+        this.movieSegmenter = movieSegmenter;
         this.assetResolutionImporter = assetResolutionImporter;
     }
 
@@ -84,7 +89,15 @@ public class WorkflowDispatcher implements Dispatching {
                 var maxCount = args[2];
                 movieEnricher.Enrich(Integer.parseInt(maxCount));
             }
-        } else {
+        } else if (command.toLowerCase().equals("segment")) {
+
+            var assets = args[1];
+            if (assets.toLowerCase().equals("movies")) {
+                var movieId = args[2];
+                movieSegmenter.CreateSegement(Integer.parseInt(movieId));
+            }
+        } 
+        else {
             System.out.println("command not found");
         }
     }
