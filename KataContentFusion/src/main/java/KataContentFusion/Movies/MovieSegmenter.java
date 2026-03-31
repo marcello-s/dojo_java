@@ -5,6 +5,9 @@
 
 package KataContentFusion.Movies;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,12 +24,22 @@ import KataContentFusion.SubTitles.Subtitle;
 import KataContentFusion.SubTitles.SubtitleExtended;
 import KataContentFusion.SubTitles.SubtitleType;
 import KataContentFusion.Tools.FFmpegUtil;
+import KataContentFusion.Tools.FFprobeUtil;
+import KataContentFusion.Tools.SceneChange;
 
 @Component
 public class MovieSegmenter {
 
+    private static final String WorkingPath = "C:/Temp/cf/";
     private static final Integer AssetTypeIdMovie = 1;
     private static final Integer AssetTypeIdSubtitle = 2;
+    private static final String RawClipFilename = "rawclip_";
+    private static final String ClipFilename = "clip_";
+    private static final String NormalizedClipFilename = "nclip_";
+    private static final Double ClipLimitTime = 3000.0;
+    private static final Integer ResolutionX = 1920;
+    private static final Integer ResolutionY = 1080;
+    private static final Integer Fps = 30;
 
     private final ScanNameMovieRepository scanNameMovieRepository;
     private final MovieRepository movieRepository;
@@ -44,7 +57,7 @@ public class MovieSegmenter {
         this.subtitleEntryRepository = subtitleEntryRepository;
     }
 
-    public void CreateSegement(Integer movieId) {
+    public void CreateSegment(Integer movieId) {
 
         var scanNameMovies = scanNameMovieRepository.findScanNameMovieByMovieId(movieId);
         if (scanNameMovies.size() == 0) {
@@ -71,10 +84,10 @@ public class MovieSegmenter {
             return;
         }
 
-        var subtitleExtendedList = CreateSubtitleExtendedList(subtitleEntries);
+        var subtitleExtendedList = createSubtitleExtendedList(subtitleEntries);
         var runtimeInMinutes = movie.map(m -> m.runtime).orElse(0);
-        var chunkStartTimes = CreateChunkStartTimes(runtimeInMinutes, 10);
-        var nonDialogSubtitles = GetSubtitles(
+        var chunkStartTimes = createChunkStartTimes(runtimeInMinutes, 10);
+        var nonDialogSubtitles = getSubtitles(
             subtitleExtendedList, 
             SubtitleType.NonDialog, 
             chunkStartTimes, 
@@ -94,13 +107,15 @@ public class MovieSegmenter {
         }
         System.out.println("movie asset: " + assetMovie.mediaPath);
 
-        var workingPath = "C:/Temp/cf/";
+        var movieClipPath = ensureMovieClipPath(WorkingPath, movieId);
         // skip first 2 non dialog segments, because they often contain opening credits and are not suitable for documetary style segments
         // var nonDialogSubtitlesSkipped = nonDialogSubtitles.stream().skip(2).toList(); 
-        CreateSegmentsFromSubtitles(nonDialogSubtitles, assetMovie.mediaPath, workingPath);
+        var rawClips = createSegmentsFromSubtitles(nonDialogSubtitles, assetMovie.mediaPath, movieClipPath);
+        var sceneClips = createSceneClips(rawClips, movieClipPath);        
+        var normalizedClips = normalizeSceneClips(sceneClips, movieClipPath, ResolutionX, ResolutionY, Fps);
     }
 
-    private List<SubtitleExtended> CreateSubtitleExtendedList(List<SubtitleEntry> subtitleEntries) {
+    private List<SubtitleExtended> createSubtitleExtendedList(List<SubtitleEntry> subtitleEntries) {
         var result = new ArrayList<SubtitleExtended>();
         Long lastTimeTo = 0L;
 
@@ -127,7 +142,7 @@ public class MovieSegmenter {
         return result;
     }
 
-    private List<Integer> CreateChunkStartTimes(Integer runtimeInMinutes, Integer numberOfChunks) {
+    private List<Integer> createChunkStartTimes(Integer runtimeInMinutes, Integer numberOfChunks) {
         var result = new ArrayList<Integer>();
         var runtimeInSeconds = runtimeInMinutes * 60;
         var chunkDurationInSeconds = runtimeInSeconds / numberOfChunks;
@@ -139,7 +154,7 @@ public class MovieSegmenter {
         return result.stream().skip(1).toList();
     }   
 
-    private List<SubtitleExtended> GetSubtitles(
+    private List<SubtitleExtended> getSubtitles(
         List<SubtitleExtended> subtitlesExtended,
         SubtitleType subtitleType, 
         List<Integer> chunkStartTimes,
@@ -179,21 +194,138 @@ public class MovieSegmenter {
         return result;
     }
 
-    private void CreateSegmentsFromSubtitles(List<SubtitleExtended> subtitlesExtended, String mediaPath, String workingPath) {
+    private String ensureMovieClipPath(String workingPath, Integer movieId) {
+
+        var moviePath = workingPath + movieId + "/";
+        var path = Path.of(moviePath);
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+                return moviePath;
+            }
+            catch (IOException ex) {
+                System.out.println("Error creating directory: " + path);
+            }
+        }
+
+        return moviePath;
+    }
+
+    private List<String> createSegmentsFromSubtitles(List<SubtitleExtended> subtitlesExtended, String mediaPath, String workingPath) {
+        
         var segmentIndex = 1;
+        var rawClipFiles = new ArrayList<String>();
 
         for (var subtitleExtended : subtitlesExtended) {
-            var outputPath = workingPath + "rawclip_" + segmentIndex + ".mp4";
-            CreateSegment(
+            var outputPath = workingPath + RawClipFilename + segmentIndex + ".mp4";
+            rawClipFiles.add(outputPath);
+            createSegment(
                 mediaPath, 
                 outputPath, 
                 subtitleExtended.subtitle().timeFrom().toEpochMilli(), 
                 subtitleExtended.subtitle().timeTo().toEpochMilli());
             segmentIndex++;
         }
+
+        return rawClipFiles;
     }
 
-    private void CreateSegment(String mediaPath, String outputPath, Long timeFrom, Long timeTo) {
-        FFmpegUtil.ExtractSegment(mediaPath, outputPath, timeFrom, timeTo);
+    private void createSegment(String mediaPath, String outputPath, Long timeFrom, Long timeTo) {
+        FFmpegUtil.extractSegment(mediaPath, outputPath, timeFrom, timeTo);
+    }
+
+    private List<String> createSceneClips(List<String> rawClips, String workingPath) {
+
+        var clipIndex = 1;
+        var clipNames = new ArrayList<String>();
+        for (var rawClip : rawClips) {
+            
+            var clipDuration = FFprobeUtil.getDuration(rawClip);
+            System.out.println("clip duration:" + clipDuration);
+            var sceneChanges = detectSceneChanges(rawClip);
+
+            var clips = new ArrayList<Clip>();
+            Double timeFrom = 0.0;
+
+            if (sceneChanges.size() == 0) {
+                // no scene changes - use the raw clip
+                var rawEndTime = limitTime(0.0, clipDuration * 1000.0, ClipLimitTime);
+                clips.add(new Clip(0L, Math.round(rawEndTime), clipIndex++));
+            } else {
+
+                for (var i = 0; i < sceneChanges.size() - 1; i++ ) {
+
+                    var sceneChange = sceneChanges.get(i);
+                    if (sceneChange.sequenceNumber() == 0 && sceneChange.timeInSeconds() < 2) {
+                        timeFrom = sceneChange.timeInSeconds();
+                        continue;
+                    }
+                    
+                    var timeTo = limitTime(timeFrom * 1000.0, sceneChange.timeInSeconds() * 1000.0, ClipLimitTime);
+                    clips.add(new Clip(Math.round(timeFrom * 1000.0), Math.round(timeTo), clipIndex++));
+                    timeFrom = sceneChange.timeInSeconds();
+                }
+
+                // add last segment to the clipDuration
+                if (sceneChanges.size() > 0) {
+                    var lastScene = sceneChanges.get(sceneChanges.size() - 1);
+                    var endTimeTo = limitTime(lastScene.timeInSeconds() * 1000.0, clipDuration * 1000.0, ClipLimitTime);
+                    clips.add(new Clip(Math.round(lastScene.timeInSeconds() * 1000.0), Math.round(endTimeTo), clipIndex++));
+                }
+            }
+
+            // cut to short clips
+            for (var clip : clips) {
+                var clipName = ClipFilename + clip.clipIndex() + ".mp4";
+                clipNames.add(clipName);
+                var outputPath = workingPath + clipName;
+                createSegment(
+                    rawClip, 
+                    outputPath, 
+                    clip.timeFrom(),
+                    clip.timeTo());
+            }
+        }
+
+        return clipNames;
+    }
+    
+    private Double limitTime(Double timeFrom, Double timeTo, Double upperlimit) {
+
+        var time = timeTo-timeFrom;
+        var timeLimited = Math.min(time, upperlimit);
+        return timeFrom + timeLimited;
+    }
+
+    private List<SceneChange> detectSceneChanges(String rawClip) {
+        return FFmpegUtil.detectSceneChanges(rawClip);
+    }
+
+    private List<String> normalizeSceneClips(
+        List<String> sceneClips, 
+        String workingPath, 
+        Integer resolutionX,
+        Integer resolutionY,
+        Integer fps) {
+
+        var clipNames = new ArrayList<String>();
+        var index = 1;
+        for (var sceneClip : sceneClips) {
+            var normalizedClipName = NormalizedClipFilename + index++ + ".mp4";
+            clipNames.add(normalizedClipName);
+            normalizeClip(workingPath + sceneClip, workingPath + normalizedClipName, resolutionX, resolutionY, fps);
+        }
+
+        return clipNames;
+    }
+
+    private void normalizeClip(
+        String sceneClipPath, 
+        String normalizedClipPath, 
+        Integer resolutionX, 
+        Integer resolutionY, 
+        Integer fps) {
+
+        FFmpegUtil.normalizeClip(sceneClipPath, normalizedClipPath, resolutionX, resolutionY, fps);
     }
 }

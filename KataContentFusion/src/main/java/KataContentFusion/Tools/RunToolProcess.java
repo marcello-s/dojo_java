@@ -12,7 +12,7 @@ import java.util.List;
 
 public class RunToolProcess {
     
-    public ProcessResult Run(String command, List<String> args) {
+    public ProcessResult run(String command, List<String> args) {
         try {
             var commandArguments = new ArrayList<String>();
             commandArguments.add(command);
@@ -23,14 +23,18 @@ public class RunToolProcess {
             processBuilder.redirectErrorStream(true); // Merges stderr into stdout
             var process = processBuilder.start();
 
+            var stringBuffer = new StringBuffer();
             try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                while (reader.readLine() != null) {
+                var line = reader.readLine();
+                while (line != null) {
                     // Just consuming the line prevents the hang
+                    stringBuffer.append(line);
+                    line = reader.readLine();
                 }
-            }
+            }            
 
-            var exitCode = process.waitFor();
-            var stdOut = new String(process.getInputStream().readAllBytes());
+            var exitCode = process.waitFor();            
+            var stdOut = stringBuffer.toString();
             var stdErr = new String(process.getErrorStream().readAllBytes());
 
             return new ProcessResult(exitCode, stdOut, stdErr);

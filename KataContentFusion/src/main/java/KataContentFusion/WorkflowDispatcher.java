@@ -94,7 +94,7 @@ public class WorkflowDispatcher implements Dispatching {
             var assets = args[1];
             if (assets.toLowerCase().equals("movies")) {
                 var movieId = args[2];
-                movieSegmenter.CreateSegement(Integer.parseInt(movieId));
+                movieSegmenter.CreateSegment(Integer.parseInt(movieId));
             }
         } 
         else {

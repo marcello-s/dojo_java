@@ -49,7 +49,7 @@ public class AssetResolutionImporter {
 
     private void importResolutionInfoForAsset(Asset asset) {
 
-        var resolution = FFprobeUtil.GetResolution(asset.mediaPath);
+        var resolution = FFprobeUtil.getResolution(asset.mediaPath);
         asset.resolutionX = resolution.width();
         asset.resolutionY = resolution.height();
         assetRepository.save(asset);
