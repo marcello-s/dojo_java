@@ -74,7 +74,7 @@ public class MovieSegmentConcatenator {
         var outputPath = WorkingPath + movieId + "aroll.mp4";            
         var clipPaths = new ArrayList<String>();
         for (var clip : clips) {
-            var path = workingPath + clip + ".mp4";
+            var path = workingPath + clip;
             clipPaths.add(path);
         }
 
