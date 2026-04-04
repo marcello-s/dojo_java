@@ -57,31 +57,32 @@ public class MovieSegmenter {
         this.subtitleEntryRepository = subtitleEntryRepository;
     }
 
-    public void CreateSegment(Integer movieId) {
+    public List<String> CreateSegment(Integer movieId) {
 
+        var empty = new ArrayList<String>();
         var scanNameMovies = scanNameMovieRepository.findScanNameMovieByMovieId(movieId);
         if (scanNameMovies.size() == 0) {
             System.out.println("no scan name movies found for movie id: " + movieId);
-            return;
+            return empty;
         }
 
         var movie = movieRepository.findById(movieId);
         if (movie == null) {
             System.out.println("no movie found for id: " + movieId);
-            return;
+            return empty;
         }
         
         var scanNameMovie = scanNameMovies.get(0);
         var assetSubtitle = assetRepository.findByScanNameIdAndAssetTypeId(scanNameMovie.scanName.id, AssetTypeIdSubtitle);
         if (assetSubtitle == null) {
             System.out.println("no asset found for scan name id: " + scanNameMovie.scanName.id);
-            return;
+            return empty;
         }
 
         var subtitleEntries = subtitleEntryRepository.findByAssetId(assetSubtitle.id);
         if (subtitleEntries.size() == 0) {
             System.out.println("no subtitle entries found for asset id: " + assetSubtitle.id);
-            return;
+            return empty;
         }
 
         var subtitleExtendedList = createSubtitleExtendedList(subtitleEntries);
@@ -103,7 +104,7 @@ public class MovieSegmenter {
         var assetMovie = assetRepository.findByScanNameIdAndAssetTypeId(scanNameMovie.scanName.id, AssetTypeIdMovie);
         if (assetMovie == null) {
             System.out.println("no movie asset found for scan name id: " + scanNameMovie.scanName.id);
-            return;
+            return empty;
         }
         System.out.println("movie asset: " + assetMovie.mediaPath);
 
@@ -112,7 +113,7 @@ public class MovieSegmenter {
         // var nonDialogSubtitlesSkipped = nonDialogSubtitles.stream().skip(2).toList(); 
         var rawClips = createSegmentsFromSubtitles(nonDialogSubtitles, assetMovie.mediaPath, movieClipPath);
         var sceneClips = createSceneClips(rawClips, movieClipPath);        
-        var normalizedClips = normalizeSceneClips(sceneClips, movieClipPath, ResolutionX, ResolutionY, Fps);
+        return normalizeSceneClips(sceneClips, movieClipPath, ResolutionX, ResolutionY, Fps);
     }
 
     private List<SubtitleExtended> createSubtitleExtendedList(List<SubtitleEntry> subtitleEntries) {

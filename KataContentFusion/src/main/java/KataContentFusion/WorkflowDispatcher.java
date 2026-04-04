@@ -5,6 +5,8 @@
 
 package KataContentFusion;
 
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Component;
 
 import KataContentFusion.LocalDb.Movie;
@@ -13,6 +15,7 @@ import KataContentFusion.Movies.AssetResolutionImporter;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
 import KataContentFusion.Movies.MovieScanner;
+import KataContentFusion.Movies.MovieSegmentConcatenator;
 import KataContentFusion.Movies.MovieSegmenter;
 import KataContentFusion.Movies.MovieSubtitleImporter;
 import KataContentFusion.Movies.MovieVolume;
@@ -26,6 +29,7 @@ public class WorkflowDispatcher implements Dispatching {
     private final MovieSubtitleImporter movieSubtitleImporter;
     private final MovieEnricher movieEnricher;
     private final MovieSegmenter movieSegmenter;
+    private final MovieSegmentConcatenator movieSegmentConcatenator;
     private final AssetResolutionImporter assetResolutionImporter;
 
     public WorkflowDispatcher(
@@ -35,12 +39,14 @@ public class WorkflowDispatcher implements Dispatching {
         MovieSubtitleImporter movieSubtitleImporter,
         MovieEnricher movieEnricher,
         MovieSegmenter movieSegmenter,
+        MovieSegmentConcatenator movieSegmentConcatenator,
         AssetResolutionImporter assetResolutionImporter) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
         this.movieSubtitleImporter = movieSubtitleImporter;
         this.movieEnricher = movieEnricher;
         this.movieSegmenter = movieSegmenter;
+        this.movieSegmentConcatenator = movieSegmentConcatenator;
         this.assetResolutionImporter = assetResolutionImporter;
     }
 
@@ -94,7 +100,9 @@ public class WorkflowDispatcher implements Dispatching {
             var assets = args[1];
             if (assets.toLowerCase().equals("movies")) {
                 var movieId = args[2];
-                movieSegmenter.CreateSegment(Integer.parseInt(movieId));
+                var movieIdNumber = Integer.parseInt(movieId);
+                var clips = movieSegmenter.CreateSegment(movieIdNumber);
+                movieSegmentConcatenator.concatenateSegments(movieIdNumber, clips);
             }
         } 
         else {

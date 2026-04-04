@@ -34,14 +34,8 @@ public class FFmpegUtil {
         arguments.add("aac");
         arguments.add('"' + outputPath + '"');
 
-        debugArguments(arguments);
-
-        var process = new RunToolProcess();
-        var result = process.run(toolName, arguments);
-
-        if (result.exitCode() != 0) {
-            System.out.println("ffmpeg failed for asset " + mediaPath + ", exit code: " + result.exitCode() + ", stdErr: " + result.stdErr());
-        }
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
     }
 
     private static String formatTime(Long timeInMilliSeconds) {
@@ -52,6 +46,26 @@ public class FFmpegUtil {
         var milliseconds = timeInMilliSeconds % 1000;
 
         return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
+    }
+   
+    private static void debugArguments(List<String> arguments) {
+
+        System.out.println("running " + toolName + " with arguments: " + String.join(" ", arguments));
+    }
+
+    private static ProcessResult runFFmpeg(List<String> arguments) {
+
+        debugArguments(arguments);
+
+        var process = new RunToolProcess();
+        return process.run(toolName, arguments);
+    }
+
+    private static void printResultFailed(ProcessResult result, String mediaPath) {
+
+        if (result.exitCode() != 0) {
+            System.out.println(toolName + " failed for asset " + mediaPath + ", exit code: " + result.exitCode() + ", stdErr: " + result.stdErr());
+        }
     }
 
     public static List<SceneChange> detectSceneChanges(String mediaPath) {
@@ -66,24 +80,14 @@ public class FFmpegUtil {
         arguments.add("null");
         arguments.add("-");
 
-        debugArguments(arguments);
-
-        var process = new RunToolProcess();
-        var result = process.run(toolName, arguments);
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
 
         if (result.exitCode() == 0) {
-
             return parseScenesFile(scenesFile);
-        } else {
-            System.out.println("ffmpeg failed for asset " + mediaPath + ", exit code: " + result.exitCode() + ", stdErr: " + result.stdErr());
         }
 
         return new ArrayList<SceneChange>();
-    }
-
-    private static void debugArguments(List<String> arguments) {
-
-        System.out.println("running " + toolName + " with arguments: " + String.join(" ", arguments));
     }
 
     private static List<SceneChange> parseScenesFile(String scenesFile) {
@@ -140,13 +144,142 @@ public class FFmpegUtil {
         arguments.add("2");
         arguments.add('"' + outputPath + '"');
 
-        debugArguments(arguments);
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
+    }
 
-        var process = new RunToolProcess();
-        var result = process.run(toolName, arguments);
+    public static void flipHorizontal(String mediaPath, String outputPath) {
 
-        if (result.exitCode() != 0) {
-            System.out.println("ffmpeg failed for asset " + mediaPath + ", exit code: " + result.exitCode() + ", stdErr: " + result.stdErr());
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-vf");
+        arguments.add('"' + "hflip" + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);        
+    }
+
+    public static void zoomFactor(String mediaPath, String outputPath, String factor) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-filter_complex");
+        arguments.add('"' + "zoompan=z=" + factor + ":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080" + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");        
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
+    }
+
+    public static void boxBlur(String mediaPath, String outputPath, Integer blurRadius) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-filter_complex");
+        arguments.add('"' + "boxblur=luma_radius=min(h\\,w)/" + blurRadius + ":luma_power=1:chroma_radius=min(cw\\,ch)/" + blurRadius + ":chroma_power=1" + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");        
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
+    }
+
+    public static void setTempo(String mediaPath, String outputPath, String tempo) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-vf");
+        arguments.add('"' + "setpts=PTS/" + tempo + '"');
+        arguments.add("-af");
+        arguments.add('"' + "atempo=" + tempo + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);        
+    }
+
+    public static void concatenateClips(String listFilePath, String outputPath) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-f");
+        arguments.add("concat");
+        arguments.add("-safe");
+        arguments.add("0");
+        arguments.add("-i");
+        arguments.add('"' + listFilePath + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, listFilePath);        
+    }
+
+    public static void concatenateClips(List<String> mediaPaths, String outputPath) {
+
+        var sb = new StringBuffer();
+        for (var i = 0; i < mediaPaths.size(); i++) {
+            sb.append("[" + i + ":v][" + i + ":a]");
         }
+        sb.append("concat=n=" + mediaPaths.size());
+
+        var arguments = new ArrayList<String>();
+        // arguments.add("-i");
+        // arguments.add('"' + baseclip + '"');
+
+        for (var mediaPath : mediaPaths) {
+            arguments.add("-i");
+            arguments.add('"' + mediaPath + '"');
+        }
+
+        arguments.add("-filter_complex");
+        // arguments.add('"' + "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[outv][outa]" + '"');
+        arguments.add('"' + sb.toString() + ":v=1:a=1[outv][outa]" + '"');
+        arguments.add("-map");
+        arguments.add("[outv]");
+        arguments.add("-map");
+        arguments.add("[outa]");
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPaths.get(0));
     }
 }
