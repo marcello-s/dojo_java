@@ -226,6 +226,50 @@ public class FFmpegUtil {
         printResultFailed(result, mediaPath);        
     }
 
+    public static void changeSaturationAndColor(
+        String mediaPath, 
+        String outputPath, 
+        String saturation, 
+        String blueMidTones) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-vf");
+        arguments.add('"' + "eq=saturation=" + saturation + ", colorbalance=bm=" + blueMidTones + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);
+    }
+
+    public static void reverseClip(String mediaPath, String outputPath) {
+
+        var arguments = new ArrayList<String>();
+        arguments.add("-i");
+        arguments.add('"' + mediaPath + '"');
+        arguments.add("-vf");
+        arguments.add('"' + "reverse" + '"');
+        arguments.add("-af");
+        arguments.add('"' + "areverse" + '"');
+        arguments.add("-c:v");
+        arguments.add("libx264");
+        arguments.add("-crf");
+        arguments.add("23");
+        arguments.add("-c:a");
+        arguments.add("aac");
+        arguments.add('"' + outputPath + '"');
+
+        var result = runFFmpeg(arguments);
+        printResultFailed(result, mediaPath);        
+    }
+
     public static void concatenateClips(String listFilePath, String outputPath) {
 
         var arguments = new ArrayList<String>();
@@ -253,11 +297,9 @@ public class FFmpegUtil {
         for (var i = 0; i < mediaPaths.size(); i++) {
             sb.append("[" + i + ":v][" + i + ":a]");
         }
-        sb.append("concat=n=" + mediaPaths.size());
 
+        sb.append("concat=n=" + mediaPaths.size());
         var arguments = new ArrayList<String>();
-        // arguments.add("-i");
-        // arguments.add('"' + baseclip + '"');
 
         for (var mediaPath : mediaPaths) {
             arguments.add("-i");
@@ -265,7 +307,6 @@ public class FFmpegUtil {
         }
 
         arguments.add("-filter_complex");
-        // arguments.add('"' + "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[outv][outa]" + '"');
         arguments.add('"' + sb.toString() + ":v=1:a=1[outv][outa]" + '"');
         arguments.add("-map");
         arguments.add("[outv]");

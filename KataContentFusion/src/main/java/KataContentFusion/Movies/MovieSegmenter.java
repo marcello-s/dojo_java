@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,10 +35,12 @@ public class MovieSegmenter {
     private static final String WorkingPath = "C:/Temp/cf/";
     private static final Integer AssetTypeIdMovie = 1;
     private static final Integer AssetTypeIdSubtitle = 2;
+    private static final String ChunkFilename = "chunk_";
     private static final String RawClipFilename = "rawclip_";
     private static final String ClipFilename = "clip_";
     private static final String NormalizedClipFilename = "nclip_";
-    private static final Double ClipLimitTime = 3000.0;
+    private static final Double ClipMinLimitTime = 800.0;
+    private static final Double ClipMaxLimitTime = 1500.0;
     private static final Integer ResolutionX = 1920;
     private static final Integer ResolutionY = 1080;
     private static final Integer Fps = 30;
@@ -87,19 +91,23 @@ public class MovieSegmenter {
 
         var subtitleExtendedList = createSubtitleExtendedList(subtitleEntries);
         var runtimeInMinutes = movie.map(m -> m.runtime).orElse(0);
-        var chunkStartTimes = createChunkStartTimes(runtimeInMinutes, 10);
+        System.out.println("movie runtime in minutes: " + runtimeInMinutes);
+        var chunkTimes = createChunkTimes(runtimeInMinutes, 10);
+        chunkTimes.forEach(chunk -> System.out.println("chunk index: " + chunk.index() + " from: " + chunk.timeFrom() + " to: " + chunk.timeTo()));
+
         var nonDialogSubtitles = getSubtitles(
             subtitleExtendedList, 
             SubtitleType.NonDialog, 
-            chunkStartTimes, 
-            3000,
+            chunkTimes, 
+            2000,
             120000, 
-            360);
+            (60 * 30));
         
+        var formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
         nonDialogSubtitles.forEach(subtitle -> {
-            System.out.println("from: " + subtitle.subtitle().timeFrom() + " to: " + subtitle.subtitle().timeTo() + " duration: " + subtitle.getDurationInMilliSesonds());
-        });
-        
+            System.out.println("from: " + formatter.format(subtitle.subtitle().timeFrom()) + " to: " + formatter.format(subtitle.subtitle().timeTo()) + " duration: " + subtitle.getDurationInMilliSesonds());
+        });        
 
         var assetMovie = assetRepository.findByScanNameIdAndAssetTypeId(scanNameMovie.scanName.id, AssetTypeIdMovie);
         if (assetMovie == null) {
@@ -109,10 +117,15 @@ public class MovieSegmenter {
         System.out.println("movie asset: " + assetMovie.mediaPath);
 
         var movieClipPath = ensureMovieClipPath(WorkingPath, movieId);
-        // skip first 2 non dialog segments, because they often contain opening credits and are not suitable for documetary style segments
-        // var nonDialogSubtitlesSkipped = nonDialogSubtitles.stream().skip(2).toList(); 
-        var rawClips = createSegmentsFromSubtitles(nonDialogSubtitles, assetMovie.mediaPath, movieClipPath);
-        var sceneClips = createSceneClips(rawClips, movieClipPath);        
+        var chunkFiles = createChunkFiles(chunkTimes, assetMovie.mediaPath, movieClipPath);
+        System.out.println("chunk files created: " + chunkFiles.size());
+
+        var rawClips = createSegmentsFromSubtitles(
+            chunkTimes,
+            nonDialogSubtitles,
+            movieClipPath);
+
+        var sceneClips = createSceneClips(rawClips, movieClipPath);
         return normalizeSceneClips(sceneClips, movieClipPath, ResolutionX, ResolutionY, Fps);
     }
 
@@ -143,57 +156,24 @@ public class MovieSegmenter {
         return result;
     }
 
-    private List<Integer> createChunkStartTimes(Integer runtimeInMinutes, Integer numberOfChunks) {
-        var result = new ArrayList<Integer>();
+    private List<FileChunk> createChunkTimes(Integer runtimeInMinutes, Integer numberOfChunks) {
+
         var runtimeInSeconds = runtimeInMinutes * 60;
         var chunkDurationInSeconds = runtimeInSeconds / numberOfChunks;
-        
+
+        var chunks = new ArrayList<FileChunk>();
         for (int i = 0; i < numberOfChunks; i++) {
-            result.add(i * chunkDurationInSeconds);
+            var chunkStartTimeInSeconds = i * chunkDurationInSeconds;
+            var chunkEndTimeInSeconds = (i + 1) * chunkDurationInSeconds;
+            chunks.add(new FileChunk(i, chunkStartTimeInSeconds, chunkEndTimeInSeconds));
         }
 
-        return result.stream().skip(1).toList();
+        // skip last chunk, because it often contains end credits and is not suitable for documetary style segments
+        return chunks.stream()
+            .skip(1)
+            .limit(chunks.size() - 2)
+            .toList();
     }   
-
-    private List<SubtitleExtended> getSubtitles(
-        List<SubtitleExtended> subtitlesExtended,
-        SubtitleType subtitleType, 
-        List<Integer> chunkStartTimes,
-        Integer minDurationMilliSeconds,
-        Integer maxDurationMilliSeconds, 
-        Integer maxTotalDurationSeconds) {
-
-        var result = new ArrayList<SubtitleExtended>();
-        var maxTotalDurationInMilliSeconds = maxTotalDurationSeconds * 1000;
-        var accumulatedDuration = 0L;
-        
-        for (var i = 0; i < chunkStartTimes.size() - 1; i++) {
-            final int index = i;
-            var chunkStartTime = chunkStartTimes.get(index);
-            var chunkStartTimeInMilliSeconds = chunkStartTime * 1000;
-       
-            var subtitleExtended = subtitlesExtended.stream()
-                .filter(subtitle -> subtitle.subtitle().timeFrom().toEpochMilli() >= chunkStartTimeInMilliSeconds
-                    && subtitle.subtitle().timeFrom().toEpochMilli() < chunkStartTimes.get(index + 1) * 1000)
-                .filter(subtitle -> subtitle.subtitleType() == subtitleType)
-                .filter(subtitle -> subtitle.getDurationInMilliSesonds() >= minDurationMilliSeconds 
-                    && subtitle.getDurationInMilliSesonds() <= maxDurationMilliSeconds)
-                .sorted(Comparator.comparing(subtitle -> subtitle.subtitle().timeFrom()))
-                .limit(2)
-                .toList();
-
-            for (var subtitle : subtitleExtended) {
-                accumulatedDuration += subtitle.getDurationInMilliSesonds();
-                if (accumulatedDuration < maxTotalDurationInMilliSeconds) {
-                    result.add(subtitle);
-                } else {
-                    break;
-                }
-            }        
-        }
-
-        return result;
-    }
 
     private String ensureMovieClipPath(String workingPath, Integer movieId) {
 
@@ -212,20 +192,96 @@ public class MovieSegmenter {
         return moviePath;
     }
 
-    private List<String> createSegmentsFromSubtitles(List<SubtitleExtended> subtitlesExtended, String mediaPath, String workingPath) {
+    private List<String> createChunkFiles(List<FileChunk> chunkTimes, String mediaPath, String workingPath) {
+
+        var chunkFiles = new ArrayList<String>();
+        for (var chunkTime : chunkTimes) {
+            var outputPath = workingPath + ChunkFilename + chunkTime.index() + ".mp4";
+            chunkFiles.add(outputPath);
+            createSegment(
+                mediaPath, 
+                outputPath, 
+                chunkTime.timeFrom() * 1000L, 
+                chunkTime.timeTo() * 1000L);
+        }
+
+        return chunkFiles;
+    }
+
+    private List<SubtitleExtended> getSubtitles(
+        List<SubtitleExtended> subtitlesExtended,
+        SubtitleType subtitleType, 
+        List<FileChunk> fileChunks,
+        Integer minDurationMilliSeconds,
+        Integer maxDurationMilliSeconds, 
+        Integer maxTotalDurationSeconds) {
+
+        var result = new ArrayList<SubtitleExtended>();
+        var maxTotalDurationInMilliSeconds = maxTotalDurationSeconds * 1000;
+        var accumulatedDuration = 0L;
+        
+        for (var i = 0; i < fileChunks.size() - 1; i++) {
+            final int index = i;
+            var chunkStartTimeInMilliSeconds = fileChunks.get(index).timeFrom() * 1000L;
+            var nextChunkStartTimeInMilliSeconds = fileChunks.get(index + 1).timeFrom() * 1000L;        
+       
+            var subtitlesFiltered = subtitlesExtended.stream()
+                .filter(subtitle -> subtitle.subtitle().timeFrom().toEpochMilli() >= chunkStartTimeInMilliSeconds
+                    && subtitle.subtitle().timeFrom().toEpochMilli() < nextChunkStartTimeInMilliSeconds)
+                .filter(subtitle -> subtitle.subtitleType() == subtitleType)
+                .filter(subtitle -> subtitle.getDurationInMilliSesonds() >= minDurationMilliSeconds 
+                    && subtitle.getDurationInMilliSesonds() <= maxDurationMilliSeconds)
+                .sorted(Comparator.comparing(subtitle -> subtitle.subtitle().timeFrom()))
+                .limit(10)
+                .toList();
+
+            for (var subtitle : subtitlesFiltered) {
+                accumulatedDuration += subtitle.getDurationInMilliSesonds();                
+                if (accumulatedDuration < maxTotalDurationInMilliSeconds) {
+                    result.add(subtitle);
+                } else {
+                    break;
+                }
+            }        
+        }
+
+        return result;
+    }
+
+    private List<String> createSegmentsFromSubtitles(
+        List<FileChunk> fileChunks,
+        List<SubtitleExtended> subtitlesExtended, 
+        String workingPath) {
         
         var segmentIndex = 1;
         var rawClipFiles = new ArrayList<String>();
 
-        for (var subtitleExtended : subtitlesExtended) {
-            var outputPath = workingPath + RawClipFilename + segmentIndex + ".mp4";
-            rawClipFiles.add(outputPath);
-            createSegment(
-                mediaPath, 
-                outputPath, 
-                subtitleExtended.subtitle().timeFrom().toEpochMilli(), 
-                subtitleExtended.subtitle().timeTo().toEpochMilli());
-            segmentIndex++;
+        for (var fileChunk : fileChunks) {
+            var chunkStartTimeInMilliSeconds = fileChunk.timeFrom() * 1000L;
+            var chunkEndTimeInMilliSeconds = fileChunk.timeTo() * 1000L;
+
+            var subtitlesInChunk = subtitlesExtended.stream()
+                .filter(subtitle -> subtitle.subtitle().timeFrom().toEpochMilli() >= chunkStartTimeInMilliSeconds
+                    && subtitle.subtitle().timeFrom().toEpochMilli() < chunkEndTimeInMilliSeconds)
+                .toList();
+
+            for (var subtitleExtended : subtitlesInChunk) {
+                var inputPath = workingPath + ChunkFilename + fileChunk.index() + ".mp4";
+                var outputPath = workingPath + RawClipFilename + segmentIndex + ".mp4";
+                var timeFrom = subtitleExtended.subtitle().timeFrom().toEpochMilli() - chunkStartTimeInMilliSeconds;
+                var timeTo = subtitleExtended.subtitle().timeTo().toEpochMilli() - chunkStartTimeInMilliSeconds;
+                if (timeTo-timeFrom < ClipMinLimitTime) {
+                    continue;
+                }
+
+                rawClipFiles.add(outputPath);
+                createSegment(
+                    inputPath, 
+                    outputPath, 
+                    timeFrom, 
+                    timeTo);
+                segmentIndex++;
+            }
         }
 
         return rawClipFiles;
@@ -250,7 +306,7 @@ public class MovieSegmenter {
 
             if (sceneChanges.size() == 0) {
                 // no scene changes - use the raw clip
-                var rawEndTime = limitTime(0.0, clipDuration * 1000.0, ClipLimitTime);
+                var rawEndTime = limitTime(0.0, clipDuration * 1000.0, ClipMaxLimitTime);
                 clips.add(new Clip(0L, Math.round(rawEndTime), clipIndex++));
             } else {
 
@@ -262,7 +318,11 @@ public class MovieSegmenter {
                         continue;
                     }
                     
-                    var timeTo = limitTime(timeFrom * 1000.0, sceneChange.timeInSeconds() * 1000.0, ClipLimitTime);
+                    var timeTo = limitTime(timeFrom * 1000.0, sceneChange.timeInSeconds() * 1000.0, ClipMaxLimitTime);
+                    if (timeTo-timeFrom*1000.0 < ClipMinLimitTime) {
+                        continue;
+                    }
+
                     clips.add(new Clip(Math.round(timeFrom * 1000.0), Math.round(timeTo), clipIndex++));
                     timeFrom = sceneChange.timeInSeconds();
                 }
@@ -270,8 +330,10 @@ public class MovieSegmenter {
                 // add last segment to the clipDuration
                 if (sceneChanges.size() > 0) {
                     var lastScene = sceneChanges.get(sceneChanges.size() - 1);
-                    var endTimeTo = limitTime(lastScene.timeInSeconds() * 1000.0, clipDuration * 1000.0, ClipLimitTime);
-                    clips.add(new Clip(Math.round(lastScene.timeInSeconds() * 1000.0), Math.round(endTimeTo), clipIndex++));
+                    var endTimeTo = limitTime(lastScene.timeInSeconds() * 1000.0, clipDuration * 1000.0, ClipMaxLimitTime);
+                    if ((endTimeTo - lastScene.timeInSeconds() * 1000.0) >= ClipMinLimitTime) {
+                        clips.add(new Clip(Math.round(lastScene.timeInSeconds() * 1000.0), Math.round(endTimeTo), clipIndex++));
+                    }
                 }
             }
 

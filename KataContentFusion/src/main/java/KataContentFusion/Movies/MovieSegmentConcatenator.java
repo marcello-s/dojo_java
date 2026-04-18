@@ -48,7 +48,7 @@ public class MovieSegmentConcatenator {
             clipNames.add(effectClipName);
             var clipPath = workingPath + clip;
             var effectClipPath = workingPath + effectClipName; 
-            switch(counter % 4) {
+            switch(counter % 5) {
                 case 0:
                     FFmpegUtil.flipHorizontal(clipPath, effectClipPath);
                     break;
@@ -60,6 +60,9 @@ public class MovieSegmentConcatenator {
                     break;
                 case 3:
                     FFmpegUtil.setTempo(clipPath, effectClipPath, "1.04");
+                    break;
+                case 4:
+                    FFmpegUtil.changeSaturationAndColor(clipPath, effectClipPath, "0.75", "0.05");
                     break;
             }
 
