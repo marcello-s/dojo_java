@@ -14,6 +14,7 @@ import KataContentFusion.LocalDb.Repos.ScriptTrackingRepository;
 import KataContentFusion.Movies.AssetResolutionImporter;
 import KataContentFusion.Movies.MovieEnricher;
 import KataContentFusion.Movies.MovieImporter;
+import KataContentFusion.Movies.MovieOverlayCreator;
 import KataContentFusion.Movies.MovieScanner;
 import KataContentFusion.Movies.MovieSegmentConcatenator;
 import KataContentFusion.Movies.MovieSegmenter;
@@ -30,6 +31,7 @@ public class WorkflowDispatcher implements Dispatching {
     private final MovieEnricher movieEnricher;
     private final MovieSegmenter movieSegmenter;
     private final MovieSegmentConcatenator movieSegmentConcatenator;
+    private final MovieOverlayCreator movieOverlayCreator;
     private final AssetResolutionImporter assetResolutionImporter;
 
     public WorkflowDispatcher(
@@ -40,6 +42,7 @@ public class WorkflowDispatcher implements Dispatching {
         MovieEnricher movieEnricher,
         MovieSegmenter movieSegmenter,
         MovieSegmentConcatenator movieSegmentConcatenator,
+        MovieOverlayCreator movieOverlayCreator,
         AssetResolutionImporter assetResolutionImporter) {
         this.movieScanner = movieScanner;
         this.movieImporter = movieImporter;
@@ -47,6 +50,7 @@ public class WorkflowDispatcher implements Dispatching {
         this.movieEnricher = movieEnricher;
         this.movieSegmenter = movieSegmenter;
         this.movieSegmentConcatenator = movieSegmentConcatenator;
+        this.movieOverlayCreator = movieOverlayCreator;
         this.assetResolutionImporter = assetResolutionImporter;
     }
 
@@ -104,7 +108,16 @@ public class WorkflowDispatcher implements Dispatching {
                 var clips = movieSegmenter.CreateSegment(movieIdNumber);
                 movieSegmentConcatenator.concatenateSegments(movieIdNumber, clips);
             }
-        } 
+        } else if (command.toLowerCase().equals("overlay")) {
+
+            var assets = args[1];
+            if (assets.toLowerCase().equals("movies")) {
+                var movieId = args[2];
+                var movieIdNumber = Integer.parseInt(movieId);
+                movieOverlayCreator.createOverlayForMovie(movieIdNumber);
+            }
+        }
+
         else {
             System.out.println("command not found");
         }

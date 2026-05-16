@@ -26,6 +26,7 @@ $ .\gradlew.bat bootRun --args="import subtitles volume-name 3"
 $ .\gradlew.bat bootRun --args="import resolutions volume-name 3"
 $ .\gradlew.bat bootRun --args="enrich movies 3"
 $ .\gradlew.bat bootRun --args="segment movies 9"
+$ .\gradlew.bat bootRun --args="overlay movies 9"
 $ .\gradlew.bat bootRun --args="blah blah blah blah"
 
 run tests
